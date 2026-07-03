@@ -1,12 +1,21 @@
 # Fake News Detection
 
+![tests](https://github.com/vermayuvraj/fake-news-detection/actions/workflows/ci.yml/badge.svg)
+![python](https://img.shields.io/badge/python-3.10-blue)
+![license](https://img.shields.io/badge/license-MIT-green)
+
 Author: Yuvraj Verma
 
-This is my solution for the Fake News Detection task (Option 1). Given a news
-article's title and body, the model classifies it as real or fake. The pipeline
-cleans the text, turns it into TF-IDF features, compares a few linear
+Given a news article's title and body, this classifies it as real or fake. The
+pipeline cleans the text, turns it into TF-IDF features, compares a few linear
 classifiers on a validation set, picks the best one, and reports the metrics on
-a held-out test set.
+a held-out test set. It reaches an F1 of 0.99 on the held-out test set, though
+most of that comes from the model learning writing style rather than actually
+checking facts (I go into this in REPORT.md).
+
+There's an interactive demo in `huggingface-space/` (Gradio) that's ready to
+deploy as a Hugging Face Space, or run locally with
+`python huggingface-space/app.py`.
 
 I wrote up the reasoning behind the approach, the results, and the limitations
 in REPORT.md. This file just explains how to run everything.
@@ -66,7 +75,12 @@ written to `reports/metrics.json` every time the pipeline runs.
    ```
 
 There's also `python scripts/leakage_demo.py`, which shows why I strip the
-Reuters source tag from the text (explained in REPORT.md).
+Reuters source tag from the text (explained in REPORT.md), and
+`python scripts/eda.py`, which regenerates the class-balance and article-length
+plots in `reports/figures/`.
+
+Unit tests (cleaning and split logic, plus a check on the saved model) run with
+`pytest`. They also run automatically on every push via GitHub Actions.
 
 ## Folder layout
 
