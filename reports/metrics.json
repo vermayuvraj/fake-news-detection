@@ -1,0 +1,80 @@
+{
+  "selected_model": "passive_aggressive",
+  "selection_metric": "f1",
+  "validation_comparison": {
+    "logistic_regression": {
+      "accuracy": 0.9853206283801185,
+      "precision": 0.9914917753828701,
+      "recall": 0.976536312849162,
+      "f1": 0.983957219251337,
+      "auc_roc": 0.998877610123663
+    },
+    "multinomial_nb": {
+      "accuracy": 0.9600824105073397,
+      "precision": 0.9524073049252906,
+      "recall": 0.9614525139664805,
+      "f1": 0.9569085348901862,
+      "auc_roc": 0.9913297050290006
+    },
+    "linear_svc": {
+      "accuracy": 0.9927890806077775,
+      "precision": 0.994943820224719,
+      "recall": 0.9893854748603352,
+      "f1": 0.9921568627450981,
+      "auc_roc": 0.9995950855071574
+    },
+    "passive_aggressive": {
+      "accuracy": 0.993046613443214,
+      "precision": 0.996060776589758,
+      "recall": 0.9888268156424581,
+      "f1": 0.992430613961312,
+      "auc_roc": 0.9996020253732181
+    }
+  },
+  "test_metrics": {
+    "accuracy": 0.9912438835951584,
+    "precision": 0.9932584269662922,
+    "recall": 0.9877094972067039,
+    "f1": 0.9904761904761905,
+    "auc_roc": 0.999521215971301
+  },
+  "test_classification_report": "              precision    recall  f1-score   support\n\n        real     0.9895    0.9943    0.9919      4186\n        fake     0.9933    0.9877    0.9905      3580\n\n    accuracy                         0.9912      7766\n   macro avg     0.9914    0.9910    0.9912      7766\nweighted avg     0.9913    0.9912    0.9912      7766\n",
+  "data": {
+    "n_train": 27177,
+    "n_val": 3883,
+    "n_test": 7766,
+    "tfidf_vocabulary_size": 50000,
+    "split": {
+      "train": 0.7,
+      "val": 0.1,
+      "test": 0.2
+    }
+  },
+  "config_snapshot": {
+    "random_seed": 42,
+    "tfidf_params": {
+      "ngram_range": [
+        1,
+        2
+      ],
+      "min_df": 5,
+      "max_df": 0.9,
+      "max_features": 50000,
+      "sublinear_tf": true,
+      "strip_accents": "unicode",
+      "stop_words": "english"
+    },
+    "min_clean_chars": 20,
+    "drop_duplicates": true,
+    "strip_source_artifacts": true,
+    "label_convention": {
+      "fake": 1,
+      "real": 0
+    }
+  },
+  "figures": {
+    "confusion_matrix": "reports/figures/confusion_matrix.png",
+    "roc_curve": "reports/figures/roc_curve.png",
+    "top_features": "reports/figures/top_features.png"
+  }
+}

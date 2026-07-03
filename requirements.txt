@@ -1,0 +1,16 @@
+# Exact, pinned versions used to produce every number in reports/metrics.json
+# and REPORT.md. Install into a clean virtual environment (see README) to
+# reproduce the results bit-for-bit.
+#
+# Python: 3.10.11
+
+numpy==1.24.3
+scipy==1.15.3
+pandas==2.3.3
+scikit-learn==1.7.2
+matplotlib==3.10.8
+joblib==1.5.2
+
+# Optional — only needed for scripts/download_data.py (automated Kaggle download).
+# You can instead download the two CSVs manually (see README > 2. Get the data).
+# kaggle==1.7.4.5
