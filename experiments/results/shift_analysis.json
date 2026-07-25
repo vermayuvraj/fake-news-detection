@@ -1,0 +1,120 @@
+{
+  "metadata_only_baseline": {
+    "features": "subject field only (article text discarded)",
+    "vocab": 9,
+    "n_train": 31428,
+    "n_test": 8980,
+    "test_f1": 1.0,
+    "test_accuracy": 1.0,
+    "test_auc": 1.0
+  },
+  "date_ranges": {
+    "real_min": "2016-01-13 00:00:00",
+    "real_max": "2017-12-31 00:00:00",
+    "fake_min": "2015-03-31 00:00:00",
+    "fake_max": "2018-02-19 00:00:00",
+    "n_fake_outside_real_window": 2926
+  },
+  "target_prior": 0.46103126770720654,
+  "shift_analysis": {
+    "random": {
+      "n_test": 7766,
+      "fake_ratio_test": 0.4609837754313675,
+      "models": {
+        "LogisticRegression": {
+          "f1_default_threshold": 0.9813927262475332,
+          "f1_threshold_oracle": 0.9839452743263997,
+          "average_precision": 0.9985101363261797,
+          "balanced_accuracy": 0.9822314738940923,
+          "f1_prior_matched_mean": 0.9813996442845154,
+          "f1_prior_matched_std": 3.0155024091614542e-05,
+          "n_prior_matched": 7765
+        },
+        "PassiveAggressive": {
+          "f1_default_threshold": 0.9904761904761905,
+          "f1_threshold_oracle": 0.9917747107207584,
+          "average_precision": 0.9994840138201567,
+          "balanced_accuracy": 0.9909880500844794,
+          "f1_prior_matched_mean": 0.9904831275555468,
+          "f1_prior_matched_std": 3.0238027876928428e-05,
+          "n_prior_matched": 7765
+        },
+        "LinearSVC": {
+          "f1_default_threshold": 0.9900518425108589,
+          "f1_threshold_oracle": 0.9920601755119098,
+          "average_precision": 0.9994566914759557,
+          "balanced_accuracy": 0.9905690556710717,
+          "f1_prior_matched_mean": 0.990058779533298,
+          "f1_prior_matched_std": 3.023777978119173e-05,
+          "n_prior_matched": 7765
+        }
+      }
+    },
+    "topic_disjoint": {
+      "n_test": 11024,
+      "fake_ratio_test": 0.1191944847605225,
+      "models": {
+        "LogisticRegression": {
+          "f1_default_threshold": 0.6995720399429387,
+          "f1_threshold_oracle": 0.8371541501976285,
+          "average_precision": 0.9018022039528696,
+          "balanced_accuracy": 0.9168234195003659,
+          "f1_prior_matched_mean": 0.9099543618135101,
+          "f1_prior_matched_std": 0.004267854252237058,
+          "n_prior_matched": 2850
+        },
+        "PassiveAggressive": {
+          "f1_default_threshold": 0.8067226890756303,
+          "f1_threshold_oracle": 0.8887189292543022,
+          "average_precision": 0.9474757742870127,
+          "balanced_accuracy": 0.9474914060258923,
+          "f1_prior_matched_mean": 0.9426625679401603,
+          "f1_prior_matched_std": 0.00321285493455399,
+          "n_prior_matched": 2850
+        },
+        "LinearSVC": {
+          "f1_default_threshold": 0.8060959792477302,
+          "f1_threshold_oracle": 0.8885519332827899,
+          "average_precision": 0.9481935789530187,
+          "balanced_accuracy": 0.9458462850362177,
+          "f1_prior_matched_mean": 0.9408072120786514,
+          "f1_prior_matched_std": 0.0035795298820612475,
+          "n_prior_matched": 2850
+        }
+      }
+    },
+    "temporal": {
+      "n_test": 7361,
+      "fake_ratio_test": 0.11275641896481456,
+      "models": {
+        "LogisticRegression": {
+          "f1_default_threshold": 0.9400116482236459,
+          "f1_threshold_oracle": 0.9576783555018138,
+          "average_precision": 0.9896831622017324,
+          "balanced_accuracy": 0.9800199419635363,
+          "f1_prior_matched_mean": 0.978274104715163,
+          "f1_prior_matched_std": 0.0018112335156243154,
+          "n_prior_matched": 1800
+        },
+        "PassiveAggressive": {
+          "f1_default_threshold": 0.9773539928486293,
+          "f1_threshold_oracle": 0.9808612440191388,
+          "average_precision": 0.9964229679723052,
+          "balanced_accuracy": 0.991832280892057,
+          "f1_prior_matched_mean": 0.991417440639298,
+          "f1_prior_matched_std": 0.001278584447102163,
+          "n_prior_matched": 1800
+        },
+        "LinearSVC": {
+          "f1_default_threshold": 0.977326968973747,
+          "f1_threshold_oracle": 0.979665071770335,
+          "average_precision": 0.9962897674584277,
+          "balanced_accuracy": 0.9913064292078742,
+          "f1_prior_matched_mean": 0.9908069995138536,
+          "f1_prior_matched_std": 0.0011297451939307414,
+          "n_prior_matched": 1800
+        }
+      }
+    }
+  }
+}
