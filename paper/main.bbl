@@ -276,6 +276,11 @@ P.~W. Koh, S.~Sagawa, H.~Marklund, S.~M. Xie, M.~Zhang, A.~Balsubramani, W.~Hu,
   distribution shifts,'' in \emph{Proceedings of the 38th International
   Conference on Machine Learning (ICML)}, 2021, pp. 5637--5664.
 
+\bibitem{sanh2019distilbert}
+V.~Sanh, L.~Debut, J.~Chaumond, and T.~Wolf, ``{DistilBERT}, a distilled
+  version of {BERT}: Smaller, faster, cheaper and lighter,'' 2019,
+  arXiv:1910.01108.
+
 \bibitem{hanley1982meaning}
 J.~A. Hanley and B.~J. McNeil, ``The meaning and use of the area under a
   receiver operating characteristic ({ROC}) curve,'' \emph{Radiology}, vol.
@@ -367,10 +372,5 @@ A.~Niculescu-Mizil and R.~Caruana, ``Predicting good probabilities with
 C.~Guo, G.~Pleiss, Y.~Sun, and K.~Q. Weinberger, ``On calibration of modern
   neural networks,'' in \emph{Proceedings of the 34th International Conference
   on Machine Learning (ICML)}, 2017, pp. 1321--1330.
-
-\bibitem{sanh2019distilbert}
-V.~Sanh, L.~Debut, J.~Chaumond, and T.~Wolf, ``{DistilBERT}, a distilled
-  version of {BERT}: Smaller, faster, cheaper and lighter,'' 2019,
-  arXiv:1910.01108.
 
 \end{thebibliography}

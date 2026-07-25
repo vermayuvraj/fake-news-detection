@@ -67,10 +67,16 @@ to~0.8067; a prior-matched resampling analysis attributes most of the latter
 collapse to class-prior shift and threshold miscalibration
 (\Fone{}~$=0.9427$) while confirming a genuine 5.2-point loss of
 discrimination. Temporal transfer within the corpus is by contrast nearly
-lossless. We conclude that within-corpus scores on this benchmark quantify
-source and topic separability rather than veracity assessment, and we recommend
-metadata-only, small-sample, and topic-disjoint baselines as inexpensive
-diagnostics that any future study on this corpus can report.
+lossless. A fine-tuned DistilBERT sharpens rather than resolves the problem: it
+is stronger in-distribution (\Fone{}~$=0.9993$) yet degrades far more under
+topic shift, losing 12.9 points of average precision against the linear model's
+5.2 and reaching prior-matched \Fone{} of only~0.689, while its in-domain
+validation \Fone{} of 0.9995 gives no warning of that collapse. We conclude that
+within-corpus scores on this benchmark quantify source and topic separability
+rather than veracity assessment, that added capacity exploits the shortcut more
+efficiently instead of avoiding it, and we recommend metadata-only,
+small-sample, and topic-disjoint baselines as inexpensive diagnostics that any
+future study on this corpus can report.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -149,6 +155,11 @@ and ablated directly.
     (Section~\ref{sec:results-shift}) that decomposes an 18.4-point deployed
     \Fone{} collapse into a class-prior/calibration component and a genuine
     5.2-point loss of average precision.
+  \item A capacity control (Section~\ref{sec:results-transformer}) in which a
+    fine-tuned DistilBERT, trained on identical documents and splits, is
+    stronger in-distribution but loses 2.5 times more average precision under
+    topic shift---evidence that the limitation is a property of the data rather
+    than of model expressiveness.
   \item Concrete, low-cost diagnostics we recommend as standard practice for
     future work on this corpus (Section~\ref{sec:discussion}).
 \end{enumerate}
@@ -279,6 +290,11 @@ This yields three empirical questions, which organise our experiments:
     the topic mix or time period changes, and how much of any observed
     degradation reflects loss of discrimination as opposed to class-prior
     shift?
+  \item[Q4] \emph{Capacity.} Is the limitation a property of the instrument or
+    of the data? If a pretrained contextual model, which can represent
+    veracity-bearing content far better than a bag of words, nonetheless
+    degrades at least as much under shift, the constraint lies in
+    $\mathcal{P}_{\text{bench}}$ rather than in model expressiveness.
 \end{description}
 
 %=============================================================================
@@ -529,6 +545,43 @@ two support a like-for-like comparison of discriminative power.
 \end{algorithmic}
 \end{algorithm}
 
+\subsection{Capacity Control: Fine-Tuned DistilBERT}
+\label{sec:method-transformer}
+Answering Q4 requires a model of substantially greater capacity evaluated under
+identical conditions. We fine-tune DistilBERT \cite{sanh2019distilbert}, a
+six-layer distillation of BERT \cite{devlin2019bert} with roughly 66M
+parameters, whose subword tokenisation and contextual self-attention
+\cite{vaswani2017attention} can in principle represent the semantic content that
+a bag of words cannot.
+
+Comparability is the whole point of the experiment, so two things are held
+fixed and one is deliberately allowed to differ. The document set and the split
+assignment are \emph{identical}: we rebuild the primary frame preserving the
+original row index, replicate each protocol exactly, and assert that the
+resulting split cardinalities match those in Table~\ref{tab:protocols} before
+training proceeds. The leakage controls C1--C3 are also identical.
+
+What differs is surface normalisation. The linear pipeline maps every character
+outside \texttt{[a--z']} to whitespace, which suits a bag-of-words model but
+discards punctuation and casing that a subword transformer can exploit. Applying
+that destructive normalisation would handicap the transformer for reasons
+unrelated to Q4, so the transformer receives a minimally normalised variant of
+the \emph{same} documents: the source tag, URLs, and e-mail addresses are
+removed and whitespace is collapsed, but punctuation and digits are retained.
+This asymmetry favours the transformer, which is the conservative direction for
+our argument---we are testing whether extra capacity \emph{helps}, so giving it
+the better input strengthens any negative result.
+
+Training uses the recipe standard for this model class: batch size 16, learning
+rate $2\times10^{-5}$ with linear warmup over the first 10\% of steps, two
+epochs, mixed-precision arithmetic, and a maximum sequence length of 256 subword
+tokens. No hyperparameter search was performed, for the same reason it was
+omitted for the linear models. Model selection follows the same rule as
+the linear models---the per-epoch checkpoint with the best \emph{validation}
+\Fone{} is the one evaluated on test. Because the corpus mean of 415 words
+exceeds 256 subword tokens, we additionally repeat the random protocol at a
+512-token limit to confirm that truncation is not what determines the outcome.
+
 \subsection{Metrics}
 We report accuracy, and precision, recall, and \Fone{} for the positive
 (fake) class:
@@ -634,18 +687,25 @@ indicators discussed in Section~\ref{sec:method-clean}; all values are computed
 by the released script rather than quoted from prior work.
 
 \textbf{Hardware and software.} All experiments run on a single machine: Intel
-Core i7-14700HX (28 logical cores), 15.7\,GB RAM, Windows~10 (AMD64). No GPU is
-used. The stack is Python~3.10.11 with scikit-learn~1.7.2
-\cite{pedregosa2011scikit}, NumPy~1.24.3 \cite{harris2020array},
-SciPy~1.15.3 \cite{virtanen2020scipy}, pandas~2.3.3 \cite{mckinney2010data},
-and Matplotlib~3.10.8 \cite{hunter2007matplotlib}. Exact versions are pinned in
-the released \texttt{requirements.txt}.
+Core i7-14700HX (28 logical cores), 15.7\,GB RAM, Windows~10 (AMD64). The linear
+pipeline uses the CPU only; the DistilBERT control uses one NVIDIA GeForce
+RTX~4050 Laptop GPU (6\,GB), peaking at 3.9\,GB of device memory. The stack is
+Python~3.10.11 with scikit-learn~1.7.2 \cite{pedregosa2011scikit},
+NumPy~1.24.3 \cite{harris2020array}, SciPy~1.15.3 \cite{virtanen2020scipy},
+pandas~2.3.3 \cite{mckinney2010data}, and Matplotlib~3.10.8
+\cite{hunter2007matplotlib}; the transformer control adds PyTorch~2.6.0 (CUDA
+12.4) and Transformers~4.56.1. Exact versions are pinned in the released
+\texttt{requirements.txt}.
 
 \textbf{Reproducibility.} A single seed ($\sigma=42$) governs the splits and all
 stochastic model components. Text normalisation is purely regular; the
 vocabulary is frequency-ordered and deterministic; logistic regression uses the
 deterministic \texttt{liblinear} solver. Two independent executions of the
-released pipeline produced bit-identical metrics. Following community
+released pipeline produced bit-identical metrics. This guarantee covers the
+linear pipeline; the DistilBERT control is seeded identically but runs
+mixed-precision CUDA kernels whose reduction order is not guaranteed, so its
+figures should be expected to reproduce to roughly three decimal places rather
+than exactly. Following community
 recommendations on reporting practice
 \cite{pineau2021improving,reimers2017reporting} we release code, seeds,
 configuration snapshots, and the machine-readable results file from which every
@@ -1056,6 +1116,106 @@ becomes rare.}
 \label{fig:roc}
 \end{figure}
 
+\subsection{Q4: Pretrained Capacity Amplifies the Shortcut}
+\label{sec:results-transformer}
+Table~\ref{tab:transformer} and Figure~\ref{fig:transformer} report the
+DistilBERT control against the selected linear model on identical documents and
+splits.
+
+In-distribution the transformer is clearly the stronger classifier, as expected:
+\Fone{} rises from $0.9905$ to $0.9993$ and average precision from $0.9995$ to
+$1.0000$ (to four decimals; the unrounded value is $0.999999$). The random-split
+benchmark therefore rewards capacity, and a study reporting only this row would
+conclude that a pretrained transformer is the better system.
+
+Under topic shift the ordering reverses sharply, and it does so on precisely the
+metrics that are robust to the prior. Average precision falls from $1.0000$ to
+$0.8711$, a loss of $12.9$ points against the linear model's $5.2$; prior-matched
+\Fone{} falls to $0.6886 \pm 0.0027$ against the linear model's $0.9427$; and
+balanced accuracy falls to $0.6131$ against $0.9475$. At its actual operating
+point the transformer collapses to \Fone{}~$=0.2592$ with precision $0.1489$ at
+recall $0.9992$: it labels almost everything fake, and since the shifted test
+prior is $0.119$, a precision of $0.1489$ is only marginally better than a
+degenerate always-fake rule. Two qualifications keep this honest. The ranking is
+not destroyed---an average precision of $0.8711$ remains far above the $0.119$
+expected of a random ranker---and the threshold-oracle value of $0.8023$ shows
+that a well-chosen cutoff would recover much of the deployed loss. But every
+prior-robust comparison places the transformer well below the linear model
+off-distribution, so the reversal is not an artefact of calibration alone.
+
+Temporal shift again shows the opposite pattern: the transformer holds at
+\Fone{}~$=0.9922$ and average precision $0.9999$, marginally ahead of the linear
+model. This reinforces the conclusion of Section~\ref{sec:results-shift} that a
+chronological split is not a meaningful stress test for this corpus, for either
+model class.
+
+Truncation does not explain the result. Repeating the random protocol with a
+512-token limit changes \Fone{} only from $0.9993$ to $0.9994$
+(Table~\ref{tab:transformer}), so the 256-token window is not the binding
+constraint on what the model can see.
+
+The most practically alarming number in the table is not a test score but a
+validation score. Under the topic-disjoint protocol the selected checkpoint had
+validation \Fone{}~$=0.9995$---higher than under the random protocol---while its
+test \Fone{} was $0.2592$. Because the validation split must be drawn from the
+training pool when no target-domain labels exist, standard model selection
+returned a confident, well-validated model that fails almost completely on the
+target distribution. No amount of care with the validation set detects this;
+only a shifted evaluation does.
+
+Taken together, Q4 answers in the direction that the data, not the instrument,
+is the binding constraint. Capacity sufficient to represent veracity-bearing
+content did not cause the model to use it. Instead the transformer fit the
+provenance signature more sharply---reaching an essentially perfect
+in-distribution ranking---and paid for it with a steeper loss when that
+signature stopped being predictive.
+
+\begin{table*}[t]
+\centering
+\caption{Capacity control: fine-tuned DistilBERT against the selected linear
+model on identical documents and splits. Columns follow
+Table~\ref{tab:shift}. The transformer wins in-distribution on every metric and
+loses off-distribution on every prior-robust metric. The final row repeats the
+random protocol at a 512-token limit, confirming that truncation is not the
+operative factor. Validation \Fone{} is shown to expose the model-selection
+trap: under topic shift it is at its highest exactly where test performance is
+at its worst.}
+\label{tab:transformer}
+\footnotesize
+\begin{tabular}{@{}llccccccccc@{}}
+\toprule
+Protocol & Model & Val.\ \Fone{} & $P$ & $R$ &
+$F_1^{\text{def}}$ & $F_1^{\text{orc}}$ & AUC & AP & Bal.\ acc. &
+$F_1^{\text{match}}$\\
+\midrule
+\multirow{2}{*}{Random (standard)}
+ & TF--IDF $+$ PA & 0.9924 & 0.9933 & 0.9877 & 0.9905 & 0.9918 & 0.9995 & 0.9995 & 0.9910 & $0.9905$\\
+ & DistilBERT     & 0.9992 & \textbf{0.9997} & \textbf{0.9989} & \textbf{0.9993} & \textbf{0.9997} & \textbf{1.0000} & \textbf{1.0000} & \textbf{0.9993} & $\mathbf{0.9993}$\\
+\midrule
+\multirow{2}{*}{Topic-disjoint}
+ & TF--IDF $+$ PA & 0.9928 & \textbf{0.7011} & 0.9498 & \textbf{0.8067} & \textbf{0.8887} & \textbf{0.9872} & \textbf{0.9475} & \textbf{0.9475} & $\mathbf{0.9427}${\scriptsize$\pm.0032$}\\
+ & DistilBERT     & 0.9995 & 0.1489 & \textbf{0.9992} & 0.2592 & 0.8023 & 0.9654 & 0.8711 & 0.6131 & $0.6886${\scriptsize$\pm.0027$}\\
+\midrule
+\multirow{2}{*}{Temporal}
+ & TF--IDF $+$ PA & 0.9684 & \textbf{0.9670} & 0.9880 & 0.9774 & 0.9809 & 0.9993 & 0.9964 & 0.9918 & $0.9914${\scriptsize$\pm.0013$}\\
+ & DistilBERT     & 0.9956 & 0.9857 & \textbf{0.9988} & \textbf{0.9922} & \textbf{0.9946} & \textbf{1.0000} & \textbf{0.9999} & \textbf{0.9985} & $\mathbf{0.9985}$\\
+\midrule
+Random, 512 tokens & DistilBERT & 0.9997 & 0.9994 & 0.9994 & 0.9994 & 0.9996 & 1.0000 & 1.0000 & 0.9995 & $0.9994$\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig_transformer.pdf}
+\caption{Prior-robust comparison across protocols. DistilBERT matches or exceeds
+the linear model in-distribution and under temporal shift, but loses
+substantially more under topic shift on both average precision and
+prior-matched \Fone{}. Greater capacity fits the provenance signature more
+sharply rather than replacing it with veracity-bearing evidence.}
+\label{fig:transformer}
+\end{figure}
+
 \subsection{Computational Cost}
 \label{sec:results-cost}
 Table~\ref{tab:cost} reports measured cost on the hardware of
@@ -1065,10 +1225,13 @@ $0.2$\,s for the other three; the full four-model pipeline completes in well
 under a minute on a single CPU. The serialised pipeline occupies $2.15$\,MB and
 sustains $3{,}002$ documents per second in batch mode, with $0.66$\,ms
 single-document latency. Two consequences follow. First, the audit is
-inexpensive: the entire study, comprising 20 fitted conditions, runs in roughly
-twelve minutes, so the diagnostics we recommend impose no practical barrier.
-Second, on cost grounds this pipeline would be an attractive deployment
-candidate---which is precisely why its failure under topic shift matters.
+inexpensive: the complete linear study, comprising 20 fitted conditions, runs in
+roughly twelve minutes on one CPU, and the DistilBERT control adds about
+32 minutes on one laptop GPU. The diagnostics we recommend therefore impose no
+practical barrier. Second, on cost grounds the linear pipeline would be an
+attractive deployment candidate---it needs no accelerator, and it holds the
+better off-distribution operating point of the two arms---which is precisely why
+its failure under topic shift matters.
 Scalability is favourable in the regime that matters here: memory grows as
 $O(Nz)$ rather than $O(NV)$, and inference is independent of $N$, so
 throughput would be maintained on substantially larger corpora, with
@@ -1076,8 +1239,9 @@ vocabulary construction the first component to require distribution.
 
 \begin{table}[t]
 \centering
-\caption{Measured computational cost (single CPU, no GPU; $N=27{,}177$
-training documents, $V=50{,}000$).}
+\caption{Measured computational cost of the linear pipeline (single CPU, no
+GPU; $N=27{,}177$ training documents, $V=50{,}000$). The DistilBERT control,
+for comparison, requires $5.8$--$6.5$ minutes of GPU time per protocol.}
 \label{tab:cost}
 \footnotesize
 \begin{tabular}{@{}lr@{}}
@@ -1124,19 +1288,36 @@ under the protocols used. What does not follow is the inference from those
 numbers to deployment readiness.
 
 \subsection{Why Model Capacity Does Not Help}
-Our results suggest a reading of the literature's near-ceiling clustering
-across model families \cite{khan2021benchmark,kaliyar2021fakebert}. If the
-label is recoverable from a redundant, low-complexity provenance signature, then
-any sufficiently expressive learner will find it, and additional capacity buys
-nothing measurable in-distribution. Worse, capacity cannot help
-out-of-distribution either, because the limitation is an identifiability
-problem in the data rather than a modelling deficiency: $\mathcal{P}_{\text{bench}}$
-does not contain the counterfactual pairs---same publisher, different
-veracity---that would be required to separate $c$ from $s$. This is the
-mechanism Schuster et al. \cite{schuster2020limitations} describe for
-machine-generated text, and our metadata-only and deletion probes are the
-analogue of hypothesis-only diagnostics in NLI
-\cite{gururangan2018annotation,poliak2018hypothesis}.
+The capacity control of Section~\ref{sec:results-transformer} lets us make this
+argument from our own evidence rather than by inference from the literature's
+near-ceiling clustering \cite{khan2021benchmark,kaliyar2021fakebert}. A
+pretrained transformer, able in principle to represent the veracity-bearing
+content $c$ that a bag of words cannot, did not use it. It fit the provenance
+signature $s$ more sharply instead---achieving an essentially perfect
+in-distribution ranking---and then lost $2.5$ times more average precision than
+the linear model when $s$ ceased to be predictive. Capacity was spent on the
+shortcut, not on an alternative to it.
+
+The explanation is that the limitation is an identifiability problem in the data
+rather than a modelling deficiency. $\mathcal{P}_{\text{bench}}$ contains no
+counterfactual pairs---same publisher, different veracity---so no objective
+computed on it can distinguish a rule keyed on $c$ from a rule keyed on $s$.
+Both achieve identical empirical risk. Gradient descent then selects whichever is
+easier to extract, and provenance style is trivially easier than factual
+verification. A higher-capacity model does not resolve this ambiguity; it merely
+resolves the easy side of it more precisely, which is why its
+in-distribution advantage and its out-of-distribution disadvantage appear
+together. This is the mechanism Schuster et al.
+\cite{schuster2020limitations} describe for machine-generated text, and our
+metadata-only and deletion probes are the analogue of hypothesis-only
+diagnostics in NLI \cite{gururangan2018annotation,poliak2018hypothesis}.
+
+There is a corollary worth stating plainly, because it inverts a common
+assumption. On a benchmark whose labels are confounded with provenance, a
+\emph{higher} reported score is weak evidence of a better system and can be
+evidence of a worse one. Our transformer would be selected over the linear model
+by any standard random-split comparison, and it is the worse choice for
+deployment on unseen sources.
 
 \subsection{Metric Choice and Deployment Risk}
 The shift analysis carries a practical lesson beyond this corpus. Under
@@ -1170,6 +1351,12 @@ pairing publisher sets:
   \item \textbf{Prior-controlled reporting.} When protocols change the class
     prior, report average precision and prior-matched \Fone{} so that
     calibration effects are not mistaken for lost discrimination.
+  \item \textbf{Do not trust in-domain validation as a shift warning.} Our
+    transformer's validation \Fone{} was $0.9995$---its highest across
+    protocols---in the very condition where test \Fone{} was $0.2592$. A
+    validation split drawn from the training pool, which is all that is
+    available without target labels, provides no signal about this failure.
+    Report a shifted evaluation or report nothing about generalisation.
 \end{enumerate}
 
 %=============================================================================
@@ -1186,15 +1373,38 @@ construction, such as claim-level resources
 important missing experiment and is the first item of
 Section~\ref{sec:futurework}.
 
-\textbf{Instrument capacity.} The probe is a bag-of-words linear model. It
-cannot represent word order beyond bigrams, negation, or discourse structure.
-Our claim is therefore asymmetric and we are careful about its direction: we
-show the benchmark \emph{can} be solved by provenance cues and that our probe
-does so, not that no model could learn veracity-bearing features. A transformer
-might exploit deeper cues; that it would need to is not evident, since it
-attains similar in-distribution scores \cite{kaliyar2021fakebert}. Testing
-whether a fine-tuned transformer degrades similarly under our topic-disjoint
-protocol would materially strengthen the argument, and we have not run it.
+\textbf{Instrument capacity.} The primary probe is a bag-of-words linear model
+that cannot represent word order beyond bigrams, negation, or discourse
+structure. The DistilBERT control (Section~\ref{sec:results-transformer})
+addresses the obvious objection, but it does not license an unlimited claim. We
+show that one widely used pretrained model, under a standard fine-tuning recipe,
+exploits the shortcut more rather than less; we do not show that no model or
+training procedure could learn veracity-bearing features from this corpus. Our
+claim remains asymmetric in that direction.
+
+\textbf{Scope of the capacity control.} The transformer result rests on a single
+architecture, a single seed, two epochs, and no hyperparameter search.
+Fine-tuning outcomes vary across seeds \cite{reimers2017reporting}, so the
+precise magnitudes---particularly the deployed \Fone{} of $0.2592$, which sits at
+a badly calibrated operating point---should be read as one draw rather than a
+tight estimate. The \emph{direction} of the effect is supported by three
+prior-robust metrics simultaneously (average precision, balanced accuracy,
+prior-matched \Fone{}) and by the 512-token replication, which is why we state
+the direction confidently and the magnitude loosely. A larger model, a
+multi-seed protocol, and a search over learning rate and epoch count would each
+sharpen this.
+
+\textbf{Asymmetric preprocessing in the control.} The transformer receives
+minimally normalised text while the linear model receives alpha-only text
+(Section~\ref{sec:method-transformer}). Document sets, splits, and leakage
+controls are identical, but this surface difference means the two arms are not
+preprocessed identically. It favours the transformer, so it cannot explain the
+transformer's worse off-distribution result; it does inflate its
+in-distribution advantage by an amount we have not measured.
+
+\textbf{GPU nondeterminism.} Unlike the linear pipeline, the transformer runs
+mixed-precision CUDA kernels and is therefore reproducible only to
+approximately three decimal places.
 
 \textbf{Confounded shift protocol.} Subject values proxy simultaneously for
 topic, sub-publication, and time-of-collection, so the topic-disjoint protocol
@@ -1241,10 +1451,12 @@ that $s$ is uninformative about $y$ by design. Retracted or corrected articles
 from a single outlet are one route; matched-pair sampling on topic and outlet is
 another.
 
-\textbf{Transformer comparison under identical protocols.} Fine-tuning
-DistilBERT \cite{sanh2019distilbert,devlin2019bert} and evaluating it under the
-same three protocols would test whether pretrained contextual representations
-resist provenance shortcuts or merely encode them more efficiently.
+\textbf{Scaling the capacity control.} Our DistilBERT result
+(Section~\ref{sec:results-transformer}) is a single architecture at a single
+seed. Extending it to a multi-seed protocol, to full-size encoders, and to
+instruction-tuned decoder models would establish whether the amplification we
+observe grows or diminishes with scale---the question that matters for whether
+current large models are safe to trust on provenance-confounded benchmarks.
 
 \textbf{Debiasing and invariance.} Adversarial removal of source-predictive
 directions, reweighting, or invariant-risk objectives could be evaluated by
@@ -1281,11 +1493,22 @@ of discrimination. Temporal transfer is by contrast nearly lossless, which
 identifies topic- and source-disjoint splits---not chronological ones---as the
 informative stress test for this corpus.
 
+A capacity control settles where the limitation lies. Fine-tuned DistilBERT,
+trained on identical documents and splits, is the stronger classifier
+in-distribution (\Fone{}~$=0.9993$, average precision $1.0000$) and the weaker
+one under topic shift on every prior-robust metric, losing $12.9$ points of
+average precision against the linear model's $5.2$ and reaching prior-matched
+\Fone{} of $0.6886$ against $0.9427$. Capacity sufficient to represent
+veracity-bearing content was instead spent fitting the provenance signature more
+sharply. Notably, its validation \Fone{} peaked at $0.9995$ in precisely the
+condition where test \Fone{} fell to $0.2592$, so standard in-domain model
+selection gives no warning of the failure.
+
 Our contribution is measurement rather than modelling, and its limits are
-correspondingly specific: one corpus, one instrument family, and a shift
-protocol that perturbs several provenance factors together
-(Section~\ref{sec:limitations}). Within those limits the practical implication
-is concrete. Reported accuracy on this benchmark should be read as a measurement
+correspondingly specific: one corpus, a shift protocol that perturbs several
+provenance factors together, and a capacity control at one architecture and one
+seed (Section~\ref{sec:limitations}). Within those limits the practical
+implication is concrete. Reported accuracy on this benchmark should be read as a measurement
 of source and topic separability, and studies using it should accompany their
 headline number with the metadata-only, small-sample, duplicate-audit, and
 topic-disjoint diagnostics of Section~\ref{sec:discussion}, each of which costs
@@ -1329,6 +1552,16 @@ Logistic regression & $C$, solver, \texttt{max\_iter} & $1.0$, liblinear, 1000\\
 Multinomial NB      & $\alpha$ & $0.1$\\
 LinearSVC           & $C$, loss & $1.0$, squared hinge\\
 Passive--aggressive & $C$, \texttt{max\_iter} & $1.0$, 1000\\
+\midrule
+\multirow{8}{*}{DistilBERT}
+ & checkpoint & \texttt{distilbert-}\\
+ &            & \texttt{base-uncased}\\
+ & max sequence length & 256 (512 in the\\
+ &                     & sensitivity run)\\
+ & batch size, epochs & 16, 2\\
+ & learning rate, warmup & $2\times10^{-5}$, 10\% linear\\
+ & precision & fp16 autocast\\
+ & selection & best per-epoch validation \Fone{}\\
 \midrule
 \multirow{4}{*}{Protocol}
  & split & $70/10/20$, stratified\\
@@ -1397,7 +1630,12 @@ normalisation, clipped at the 98th percentile for legibility (right).}
     (Section~\ref{sec:setup}); no GPU required.
   \item \textbf{Randomness.} Single seed $\sigma=42$ for splits and models;
     deterministic solver and frequency-ordered vocabulary. Two independent runs
-    produced bit-identical metrics.
+    of the linear pipeline produced bit-identical metrics; the DistilBERT
+    control is seeded identically but, running mixed-precision CUDA kernels,
+    reproduces to approximately three decimal places.
+  \item \textbf{Split alignment.} The transformer script asserts that its split
+    cardinalities equal those of the linear runs before training, so the
+    capacity comparison cannot silently drift out of alignment.
   \item \textbf{Protocol integrity.} Model selection on validation only; the
     test split is evaluated once per condition; the vectoriser is fitted on
     training data only.
@@ -1407,9 +1645,13 @@ normalisation, clipped at the 98th percentile for legibility (right).}
     cross-validation, McNemar exact tests, and $M{=}20$ prior-matched
     resamples.
   \item \textbf{Artifacts.} Machine-readable results
-    (\texttt{results.json}, \texttt{shift\_analysis.json}) accompany the code, and
-    all reported values are drawn from them.
-  \item \textbf{Compute.} Complete study $\approx12$ minutes on one CPU.
+    (\texttt{results.json}, \texttt{shift\_analysis.json},
+    \texttt{transformer.json}) accompany the code, and all reported values are
+    drawn from them.
+  \item \textbf{Compute.} Linear study $\approx12$ minutes on one CPU;
+    transformer control $\approx32$ minutes on one RTX~4050 (three protocols
+    at $6.5$, $5.8$ and $6.2$ minutes, plus $13.0$ minutes for the 512-token
+    replication).
 \end{itemize}
 
 %=============================================================================

@@ -249,4 +249,45 @@ axes[1].set_ylabel("Count")
 axes[1].legend(frameon=False)
 save(fig, "fig_corpus.pdf")
 
+# --------------------------------------------------------------------------- #
+# Fig. 9: TF-IDF vs DistilBERT across protocols (only if the run exists)
+# --------------------------------------------------------------------------- #
+tpath = RES / "transformer.json"
+if tpath.exists():
+    T = json.load(open(tpath, encoding="utf-8"))
+    protos = ["random", "topic_disjoint", "temporal"]
+    pn = ["Random\n(standard)", "Topic-disjoint", "Temporal"]
+    lin = [S["shift_analysis"][p]["models"]["PassiveAggressive"] for p in protos]
+    trf = [T["protocols"][p]["test"] for p in protos]
+
+    fig, axes = plt.subplots(1, 2, figsize=(COL2 * 0.74, 2.6), sharex=True)
+    x = np.arange(len(protos))
+    w = 0.36
+    for ax, key, title in zip(
+            axes,
+            ["average_precision", "f1_prior_matched_mean"],
+            ["Average precision", "$F_1$ (prior-matched)"]):
+        a = [d[key] for d in lin]
+        b = [d[key] for d in trf]
+        r1 = ax.bar(x - w / 2, a, w, label="TF-IDF + PA", color=C_MAIN)
+        r2 = ax.bar(x + w / 2, b, w, label="DistilBERT", color=C_ALT)
+        for rr, vals in ((r1, a), (r2, b)):
+            for bb, v in zip(rr, vals):
+                ax.text(bb.get_x() + bb.get_width() / 2, v + 0.008,
+                        f"{v:.3f}", ha="center", va="bottom", fontsize=5.8,
+                        rotation=90)
+        ax.set_xticks(x)
+        ax.set_xticklabels(pn, fontsize=6.6)
+        # Range must accommodate the transformer's prior-matched collapse (0.689).
+        ax.set_ylim(0.60, 1.09)
+        ax.set_yticks([0.6, 0.7, 0.8, 0.9, 1.0])
+        ax.set_title(title)
+    axes[0].set_ylabel("Score")
+    axes[0].legend(frameon=False, ncol=2, fontsize=6.4, loc="upper center",
+                   bbox_to_anchor=(1.02, -0.19), handlelength=1.1,
+                   columnspacing=1.4)
+    save(fig, "fig_transformer.pdf")
+else:
+    print("skipping fig_transformer.pdf (transformer.json not present yet)")
+
 print("all figures written to", FIG)

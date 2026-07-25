@@ -132,6 +132,33 @@ present("vectorize s", f"{rt['vectorize_seconds']:.2f}")
 # --- control --------------------------------------------------------------
 present("permutation AUC", R["label_permutation_control"]["test"]["auc_roc"])
 
+# --- transformer capacity control -----------------------------------------
+TPATH = RES / "transformer.json"
+if TPATH.exists():
+    T = json.load(open(TPATH, encoding="utf-8"))
+    for proto, pv in T["protocols"].items():
+        t = pv["test"]
+        for k in ["precision", "recall", "f1_default_threshold",
+                  "f1_threshold_oracle", "average_precision",
+                  "balanced_accuracy", "f1_prior_matched_mean"]:
+            present(f"bert {proto} {k}", t[k])
+        present(f"bert {proto} val F1", pv["val_f1_selected"])
+        present(f"bert {proto} AUC", t["auc_roc"])
+    s = T["sensitivity_maxlen512_random"]["test"]
+    present("bert 512 F1", s["f1_default_threshold"])
+    # Linear-model validation F1 per protocol, quoted in the comparison table.
+    for proto in ["random", "topic_disjoint", "temporal"]:
+        present(f"PA {proto} val F1",
+                R["shift"][proto]["models"]["PassiveAggressive"]["val"]["f1"])
+        present(f"PA {proto} test AUC",
+                R["shift"][proto]["models"]["PassiveAggressive"]["test"]["auc_roc"])
+    for proto, pv in T["protocols"].items():
+        present(f"bert {proto} train min", f"{pv['train_minutes']:.1f}")
+    present("bert 512 train min",
+            f"{T['sensitivity_maxlen512_random']['train_minutes']:.1f}")
+else:
+    print("NOTE: transformer.json absent; capacity-control checks skipped")
+
 # --- derived quantities the paper states ----------------------------------
 derived = {
     "mitigation cost (A1-A4)":
@@ -160,6 +187,12 @@ derived = {
     "representation spread":
         max(v["test"]["f1"] for v in R["representation_ablation"].values())
         - min(v["test"]["f1"] for v in R["representation_ablation"].values()),
+    "bert topic AP drop":
+        T["protocols"]["random"]["test"]["average_precision"]
+        - T["protocols"]["topic_disjoint"]["test"]["average_precision"],
+    "bert topic F1match drop":
+        T["protocols"]["random"]["test"]["f1_prior_matched_mean"]
+        - T["protocols"]["topic_disjoint"]["test"]["f1_prior_matched_mean"],
     "LC 543 as pct of full":
         100 * R["learning_curve"]["0.020"]["test_f1"]
         / R["leakage_ablation"]["A4_primary"]["test"]["f1"],
