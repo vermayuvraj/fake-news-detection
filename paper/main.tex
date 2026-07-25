@@ -23,13 +23,6 @@
 \usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
 \usepackage[hidelinks]{hyperref}
 
-% ---------------------------------------------------------------------------
-% Author-input marker. Every occurrence flags information that must come from
-% the author rather than be inferred. Remove the macro body before submission.
-% ---------------------------------------------------------------------------
-\newcommand{\authorinput}[1]{%
-  \textcolor{red}{\textbf{[Author Input Required:} #1\textbf{]}}}
-
 \newcommand{\dataset}{\textsc{ISOT/Kaggle}}
 \newcommand{\Fone}{$F_1$}
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -42,11 +35,10 @@ A Reproducible Audit of Shortcut Learning\\
 in a Widely Used Fake News Corpus}
 
 \author{\IEEEauthorblockN{Yuvraj Verma}
-\IEEEauthorblockA{Independent Researcher\\
-Email: \authorinput{preferred contact e-mail for the camera-ready version}\\
-Code and data: \url{https://github.com/vermayuvraj/fake-news-detection}}
-\thanks{\authorinput{ORCID identifier, and any acknowledgement of
-computing resources, advisors, or funding, if applicable.}}}
+\IEEEauthorblockA{Independent Researcher, India\\
+ORCID: 0009-0004-2138-3159\\
+Email: yuvrajverma282004@gmail.com\\
+Code and data: \url{https://github.com/vermayuvraj/fake-news-detection}}}
 
 \maketitle
 
@@ -109,9 +101,7 @@ Our object of study is the ``Fake and Real News'' dataset
 \cite{bisaillon2020dataset}, a redistribution of the corpus introduced by
 Ahmed et al. \cite{ahmed2017detection,ahmed2018detecting} and among the most
 frequently used public resources for this task
-\cite{khan2021benchmark}.\footnote{\authorinput{if a quantitative statement of
-usage is desired (e.g.\ ``used in $N$ published studies''), supply a verifiable
-count or citation; we deliberately avoid an unsupported figure here.}} It pairs
+\cite{khan2021benchmark}. It pairs
 21{,}417 genuine articles drawn from a single newswire against 23{,}481
 articles from outlets flagged by fact-checking organisations. That construction
 is convenient and, as we show, consequential: the two classes differ
@@ -1423,10 +1413,6 @@ normalisation, clipped at the 98th percentile for legibility (right).}
 \end{itemize}
 
 %=============================================================================
-\section*{Acknowledgment}
-\authorinput{acknowledgements, if any (advisors, reviewers, institutions).
-Delete this section if not applicable.}
-
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
 

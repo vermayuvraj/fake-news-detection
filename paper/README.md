@@ -76,19 +76,33 @@ python experiments/make_figures.py         # writes paper/figures/*.pdf
 Total runtime is roughly twelve minutes on one CPU. Every number quoted in the
 manuscript comes from those two JSON files; nothing is transcribed by hand.
 
-## Before you submit — required author actions
+## Before you submit — remaining author actions
 
-The manuscript contains a `\authorinput{...}` macro that renders in **red**.
-Search for `authorinput` and resolve each occurrence, then delete the macro
-definition (near the top of `main.tex`) so any stragglers fail loudly rather
-than printing in red:
+Author metadata is complete. The manuscript carries:
 
-| Location | What is needed |
-|---|---|
-| Author block | Contact e-mail for the camera-ready version |
-| `\thanks` | ORCID, and any funding/acknowledgement |
-| Introduction footnote | Optional verifiable usage count for the dataset, or delete the footnote |
-| Acknowledgment section | Acknowledgements, or delete the section |
+```
+Yuvraj Verma
+Independent Researcher, India
+ORCID: 0009-0004-2138-3159
+Email: yuvrajverma282004@gmail.com
+```
+
+All placeholder markers have been resolved and the `\authorinput` macro has been
+removed, so a stray marker would now raise an undefined-control-sequence error
+rather than print in red. Two editorial decisions were taken while clearing them,
+both trivially reversible:
+
+| Decision | Rationale | To reverse |
+|---|---|---|
+| Deleted the Introduction footnote about dataset usage counts | The sentence is already hedged ("among the most frequently used") and carries a citation; an unsupported count would be worse than none | Re-add a footnote with a verifiable figure |
+| Deleted the empty `Acknowledgment` section | No funding, advisors, or institutional resources to acknowledge | Re-add `\section*{Acknowledgment}` before the bibliography |
+
+What remains is the ordinary final pass:
+
+1. Verify reference metadata (checklist below).
+2. Compile on Overleaf and read the PDF page by page.
+3. Generate `main.bbl` for arXiv (see `ARXIV_SUBMISSION_GUIDE.md` §2 — already
+   included in the distributed ZIP).
 
 ### Reference verification checklist
 

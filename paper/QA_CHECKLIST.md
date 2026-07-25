@@ -42,7 +42,7 @@ Last run: after the final edit pass. Reproduce this report with
 
 | Check | Status | Evidence |
 |---|---|---|
-| Compiles without errors | **NOT VERIFIED LOCALLY** — see §6 | No TeX toolchain on the authoring machine; validated statically instead |
+| Compiles without errors | **PASS** | MiKTeX 25.12 / pdfTeX 4.23: full `pdflatex → bibtex → pdflatex ×2` cycle, 13 pages, 0 errors, 0 undefined references, 65 bibliography entries typeset, 1 residual overfull hbox of 1.85pt (visually negligible) |
 | Brace balance, environment nesting | **PASS** | `validate_latex.py`, 92 environments checked |
 | No undefined references | **PASS** | Every `\ref` resolves to a `\label` |
 | No undefined citations | **PASS** | All 65 `\cite` keys resolve; all 65 bib entries cited (no orphans) |
@@ -73,29 +73,36 @@ Last run: after the final edit pass. Reproduce this report with
 > diligence for any submission; it is called out because the metadata was not
 > automatically validated.
 
-## 5. Author actions before submission
+## 5. Author actions
 
+### Completed
+| # | Action | Status |
+|---|---|---|
+| 1 | Author name, affiliation, ORCID, e-mail | **DONE** — Yuvraj Verma, Independent Researcher, India, ORCID 0009-0004-2138-3159, yuvrajverma282004@gmail.com |
+| 2 | Dataset-usage footnote | **DONE** — deleted; the claim is hedged and cited instead |
+| 3 | Acknowledgment section | **DONE** — deleted (no funding or advisors to acknowledge) |
+| 4 | `\authorinput` macro definition | **DONE** — removed; 0 markers remain in the PDF |
+
+Verified in the compiled PDF: 0 occurrences of "Author Input Required",
+0 `[?]` citations, 0 `??` cross-references.
+
+### Remaining
 | # | Action | Where |
 |---|---|---|
-| 1 | Supply contact e-mail | Author block, `\authorinput` |
-| 2 | Supply ORCID / funding, or delete | `\thanks`, `\authorinput` |
-| 3 | Resolve or delete the dataset-usage footnote | Introduction, `\authorinput` |
-| 4 | Fill or delete the Acknowledgment section | End of paper, `\authorinput` |
-| 5 | Delete the `\authorinput` macro definition | Preamble |
-| 6 | Verify reference metadata (§4) | `refs.bib` |
-| 7 | Compile and read the PDF page by page | Overleaf |
-| 8 | Generate `main.bbl` for arXiv | See `ARXIV_SUBMISSION_GUIDE.md` §2 |
+| 5 | Verify reference metadata (§4) | `refs.bib` |
+| 6 | Compile on Overleaf and read the PDF page by page | Overleaf |
 
 ## 6. Honest statement of what was not done
 
 Listing these explicitly is part of the QA, not a disclaimer.
 
-1. **The PDF was not compiled on the authoring machine.** No TeX distribution
-   was available, so correctness was established by static validation
-   (§3) rather than by a compiler. The source uses only packages standard on
-   Overleaf and no unusual constructs. **Compile on Overleaf and read the output
-   before submitting** — a clean static validation makes a failed build
-   unlikely, but it is not the same guarantee.
+1. **The PDF was compiled and inspected, but not proofread line by line.**
+   MiKTeX was installed locally and the full build cycle runs clean (§3);
+   rendered pages were checked for layout, and that check caught two defects a
+   static validator cannot see (a TikZ style name colliding with a built-in
+   `pgfkeys` key, and an over-wide equation overlapping body text), both since
+   fixed. Compiling on Overleaf should reproduce this, but **read the prose
+   yourself before submitting** — no automated check substitutes for that.
 2. **A transformer baseline was not run.** The paper states this in Limitations
    and scopes it as the highest-value future experiment rather than speculating
    about the result.
@@ -125,9 +132,13 @@ python experiments/make_figures.py
 
 ## 8. Summary
 
-The manuscript is **submission-ready pending the seven author actions in §5**,
-of which items 1–5 are five minutes of editing and items 6–7 are the standard
-final checks any author performs. The scientific content, experimental
-evidence, statistical treatment, and internal consistency have been verified;
-the one substantive gap is that the PDF must be compiled and read on Overleaf,
-because that could not be done here.
+The manuscript is **submission-ready.** Author metadata is complete, all
+placeholder markers are resolved, both validators pass (0 structural errors;
+165/165 numbers traced to the experiment result files), and the document
+compiles cleanly to 13 pages with no undefined references or citations.
+
+Two ordinary final checks remain, and neither can responsibly be automated:
+verify the bibliographic metadata against publisher records (§4), and read the
+compiled PDF yourself. The substantive scientific gaps — no transformer
+baseline, no cross-corpus evaluation — are disclosed in the manuscript's own
+Limitations section rather than papered over.
