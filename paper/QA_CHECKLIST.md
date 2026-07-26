@@ -24,6 +24,8 @@ Last run: after the final edit pass. Reproduce this report with
 | Capacity control comparable | **PASS** | Transformer script asserts identical split cardinalities to the linear runs before training |
 | Reproducibility | **PASS** | Single seed, pinned versions, deterministic solver; two linear runs bit-identical. Transformer arm seeded but GPU-nondeterministic (~3 d.p.), disclosed in the manuscript |
 | Internal consistency of terminology and notation | **PASS** | Manual pass; \(s\)/\(c\)/\(\pi\)/\(C\)/\(z\) used consistently throughout |
+| AI-use disclosure present | **PASS** | Appendix E "Use of AI Tools" discloses tooling and states author responsibility, per arXiv's Jan-2023 generative-AI policy |
+| Prose density pass | **PASS** | Em-dash count reduced 63 -> 39; the two longest sentences (84w, 59w) split; meaning unchanged, `verify_numbers.py` still 203/203 |
 | Complexity and runtime analysis present | **PASS** | Section "Computational Complexity" + Table "Measured computational cost" |
 
 ## 2. Writing quality
@@ -43,7 +45,7 @@ Last run: after the final edit pass. Reproduce this report with
 
 | Check | Status | Evidence |
 |---|---|---|
-| Compiles without errors | **PASS** | MiKTeX 25.12 / pdfTeX 4.23: full `pdflatex → bibtex → pdflatex ×2` cycle, 16 pages, 0 errors, 0 undefined references, 65 bibliography entries typeset, 1 residual overfull hbox of 1.85pt (visually negligible) |
+| Compiles without errors | **PASS** | MiKTeX 25.12 / pdfTeX 4.23: full `pdflatex → bibtex → pdflatex ×2` cycle, 16 pages (incl. an AI-use disclosure appendix per arXiv policy), 0 errors, 0 undefined references, 65 bibliography entries typeset, 1 residual overfull hbox of 1.85pt (visually negligible) |
 | Brace balance, environment nesting | **PASS** | `validate_latex.py`, 100 environments checked |
 | No undefined references | **PASS** | Every `\ref` resolves to a `\label` |
 | No undefined citations | **PASS** | All 65 `\cite` keys resolve; all 65 bib entries cited (no orphans) |

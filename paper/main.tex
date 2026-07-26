@@ -111,7 +111,7 @@ frequently used public resources for this task
 21{,}417 genuine articles drawn from a single newswire against 23{,}481
 articles from outlets flagged by fact-checking organisations. That construction
 is convenient and, as we show, consequential: the two classes differ
-systematically in provenance and house style, not only in truthfulness.
+systematically in provenance and house style, not merely in truthfulness.
 
 The phenomenon we investigate is \emph{shortcut learning}: a model attaining
 high benchmark scores by exploiting surface regularities that correlate with
@@ -132,8 +132,8 @@ separates calibration effects from genuine degradation.
 We deliberately do not propose a new architecture. A stronger model would
 confound the question: if the benchmark is degenerate, a higher score is
 evidence about the benchmark, not the model. We instead fix a transparent,
-fully interpretable pipeline---TF--IDF features with four linear
-classifiers---and vary the \emph{data} and the \emph{evaluation protocol},
+fully interpretable pipeline (TF--IDF features with four linear classifiers)
+and vary the \emph{data} and the \emph{evaluation protocol},
 using the classifier as a probe. Linear models make this strategy viable
 because every decision decomposes into per-token weights that can be inspected
 and ablated directly.
@@ -172,8 +172,8 @@ and ablated directly.
 Surveys of the area distinguish content-based approaches from those exploiting
 social context and external evidence
 \cite{shu2017fake,zhou2020survey,oshikawa2020survey}. Purely content-based
-detection is attractive operationally---it needs only the article---but is
-theoretically limited, since textual form underdetermines factual accuracy.
+detection is attractive operationally, since it needs only the article, but it
+is theoretically limited, since textual form underdetermines factual accuracy.
 Within that paradigm, P\'erez-Rosas et al. \cite{perezrosas2018automatic}
 report linguistic-feature classifiers across several domains, while Horne and
 Adal{\i} \cite{horne2017this} find that headlines alone carry substantial
@@ -281,8 +281,8 @@ capacity or dataset size---only by changing the data or the protocol.
 This yields three empirical questions, which organise our experiments:
 \begin{description}
   \item[Q1] \emph{Explicit leakage.} How much of the benchmark score is
-    attributable to identifiable artifacts---metadata fields, source tags, and
-    duplicate documents---that can be removed by preprocessing?
+    attributable to identifiable artifacts (metadata fields, source tags, and
+    duplicate documents) that can be removed by preprocessing?
   \item[Q2] \emph{Residual signal structure.} After removing those artifacts,
     is the remaining signal concentrated in a few tokens (hence removable) or
     diffusely distributed across editorial style (hence not)?
@@ -311,9 +311,8 @@ well-defined meaning \cite{ribeiro2016why}. Second, determinism: with a fixed se
 coordinate-descent solver the pipeline is bit-reproducible, which matters when
 differences of interest are on the order of $10^{-2}$. Third, capacity control:
 if a low-capacity model already saturates the benchmark, high scores cannot be
-attributed to sophisticated inference. The trade-off---no modelling of word
-order beyond short $n$-grams, no lexical generalisation---is accepted
-knowingly, and Section~\ref{sec:limitations} states where it constrains our
+attributed to sophisticated inference. The trade-off is accepted knowingly: no modelling of word
+order beyond short $n$-grams, and no lexical generalisation. and Section~\ref{sec:limitations} states where it constrains our
 conclusions.
 
 Distributed word representations \cite{mikolov2013efficient,pennington2014glove},
@@ -862,8 +861,8 @@ Table~\ref{tab:ablation} and Figure~\ref{fig:ablation} isolate the three
 channels using logistic regression as a fixed probe.
 
 The most consequential result requires no classifier of the article at all. A
-model whose only input is the \texttt{subject} field---the article text
-discarded entirely---attains \Fone{}~$=1.000$ and accuracy~$=1.000$ on a
+model whose only input is the \texttt{subject} field, with the article text
+discarded entirely, attains \Fone{}~$=1.000$ and accuracy~$=1.000$ on a
 held-out split, with a vocabulary of nine tokens. This is not a subtle
 correlation but a deterministic mapping: the two classes have disjoint subject
 supports (Table~\ref{tab:corpus}), so any model given this field can recover
@@ -934,8 +933,8 @@ unrestricted vocabulary ($0.9800$). When a tenfold reduction in capacity does
 not degrade performance, the discriminative information is heavily redundant.
 
 \textbf{Very little data suffices.} Figure~\ref{fig:learning} shows the
-learning curve. With $543$ labelled documents---$2\%$ of the training
-split---the probe reaches \Fone{}~$0.9334$, i.e.\ $95.1\%$ of the full-data
+learning curve. With $543$ labelled documents, $2\%$ of the training
+split, the probe reaches \Fone{}~$0.9334$, i.e.\ $95.1\%$ of the full-data
 figure; $135$ documents already yield $0.6802$. Tasks requiring genuine
 inference do not typically saturate on a few hundred examples.
 
@@ -944,9 +943,9 @@ $|w|$ under the probe and removing the top $K$ from the vocabulary entirely
 (so bigrams containing them are also destroyed) yields
 Figure~\ref{fig:deletion}: \Fone{} declines gracefully from $0.9814$ at $K=0$
 to $0.9600$ at $K=100$ and $0.9263$ at $K=1000$. Removing the thousand most
-discriminative unigrams---among them \emph{said}, \emph{video},
+discriminative unigrams (among them \emph{said}, \emph{video},
 \emph{washington}, \emph{image}, \emph{featured}, \emph{getty}, and the
-weekday names---still leaves a model within $5.5$ points of the original. The
+weekday names) still leaves a model within $5.5$ points of the original. The
 shortcut is not a token; it is a register.
 
 Figure~\ref{fig:coefficients} makes that register legible. The strongest
@@ -1055,8 +1054,8 @@ Temporal shift, by contrast, is nearly benign: average precision moves only
 from $0.9995$ to $0.9964$ and prior-matched \Fone{} is statistically
 indistinguishable from the random-protocol value
 ($0.9914 \pm 0.0013$ versus $0.9905$). The asymmetry is informative. Publisher
-house style is stable over the 2016--2017 window, so a chronological split---the
-protocol often recommended as a realism improvement---does \emph{not} expose
+house style is stable over the 2016--2017 window, so a chronological split, the
+protocol often recommended as a realism improvement, does \emph{not} expose
 the shortcut. Only perturbing provenance and topic does. Practitioners seeking a
 stress test for this corpus should therefore prefer topic- or source-disjoint
 splits over temporal ones.
@@ -1156,7 +1155,7 @@ constraint on what the model can see.
 
 The most practically alarming number in the table is not a test score but a
 validation score. Under the topic-disjoint protocol the selected checkpoint had
-validation \Fone{}~$=0.9995$---higher than under the random protocol---while its
+validation \Fone{}~$=0.9995$, higher than under the random protocol, while its
 test \Fone{} was $0.2592$. Because the validation split must be drawn from the
 training pool when no target-domain labels exist, standard model selection
 returned a confident, well-validated model that fails almost completely on the
@@ -1266,14 +1265,14 @@ Single-document latency & $0.66$\,ms\\
 \label{sec:discussion}
 
 \subsection{What the Benchmark Score Measures}
-Assembling the evidence: the corpus can be solved exactly from a metadata field
-(Section~\ref{sec:results-ablation}); after that field and two further leakage
-channels are removed, performance falls by only $1.21$ points; the surviving
-signal is insensitive to representation, acquirable from a few hundred
-examples, and robust to deleting a thousand of its strongest features
-(Section~\ref{sec:results-representation}); the features it relies on are
-recognisably editorial conventions (Figure~\ref{fig:coefficients}); and it
-degrades measurably when provenance and topic change but not when only time
+Consider the evidence together. The corpus can be solved exactly from a
+metadata field (Section~\ref{sec:results-ablation}), and removing that field
+along with two further leakage channels costs only $1.21$ points. What survives
+is insensitive to representation, acquirable from a few hundred examples, and
+robust to deleting a thousand of its strongest features
+(Section~\ref{sec:results-representation}); the features it does rely on are
+recognisably editorial conventions (Figure~\ref{fig:coefficients}). Finally, it
+degrades measurably when provenance and topic change, but not when only time
 changes (Section~\ref{sec:results-shift}). The consistent explanation is that
 high scores on this benchmark quantify \emph{source and topic separability}. In
 the notation of Section~\ref{sec:problem}, the pipeline is an efficient
@@ -1293,14 +1292,14 @@ argument from our own evidence rather than by inference from the literature's
 near-ceiling clustering \cite{khan2021benchmark,kaliyar2021fakebert}. A
 pretrained transformer, able in principle to represent the veracity-bearing
 content $c$ that a bag of words cannot, did not use it. It fit the provenance
-signature $s$ more sharply instead---achieving an essentially perfect
-in-distribution ranking---and then lost $2.5$ times more average precision than
+signature $s$ more sharply instead, achieving an essentially perfect
+in-distribution ranking, and then lost $2.5$ times more average precision than
 the linear model when $s$ ceased to be predictive. Capacity was spent on the
 shortcut, not on an alternative to it.
 
 The explanation is that the limitation is an identifiability problem in the data
 rather than a modelling deficiency. $\mathcal{P}_{\text{bench}}$ contains no
-counterfactual pairs---same publisher, different veracity---so no objective
+counterfactual pairs (same publisher, different veracity), so no objective
 computed on it can distinguish a rule keyed on $c$ from a rule keyed on $s$.
 Both achieve identical empirical risk. Gradient descent then selects whichever is
 easier to extract, and provenance style is trivially easier than factual
@@ -1326,15 +1325,15 @@ while deployed \Fone{} sits at $0.8067$ (Figure~\ref{fig:roc}). A study
 reporting only ROC-AUC would therefore describe a system that is, at its actual
 operating point, wrong about $30\%$ of its positive predictions. Because
 misinformation is rare in realistic streams, precision as defined in
-Equation~\eqref{eq:prf} is the quantity that governs harm---false positives suppress legitimate
-journalism---and it is exactly the quantity most sensitive to the prior shift
-that accompanies deployment. We therefore recommend reporting average precision
+Equation~\eqref{eq:prf} is the quantity that governs harm, since false positives
+suppress legitimate journalism, and it is exactly the quantity most sensitive to
+the prior shift that accompanies deployment. We therefore recommend reporting average precision
 together with the operating point actually used, and treating calibration as a
 first-class concern rather than a post-hoc adjustment
 \cite{platt1999probabilistic,niculescu2005predicting,guo2017calibration}.
 
 \subsection{Recommended Diagnostics}
-The probes used here are cheap---each is minutes of CPU time---and we suggest
+The probes used here are cheap, a few minutes of CPU time each, and we suggest
 them as routine reporting for any study using this corpus or one built by
 pairing publisher sets:
 \begin{enumerate}
@@ -1653,6 +1652,19 @@ normalisation, clipped at the 98th percentile for legibility (right).}
     at $6.5$, $5.8$ and $6.2$ minutes, plus $13.0$ minutes for the 512-token
     replication).
 \end{itemize}
+
+\section{Use of AI Tools}
+\label{app:aitools}
+Consistent with arXiv policy, we disclose tool use. Modelling, data analysis,
+and figures use the standard scientific-Python stack cited in
+Section~\ref{sec:setup}; no generative model is part of the method, the data
+pipeline, or the results. During manuscript preparation, an AI coding assistant
+was used to help implement the experiment scripts and to help draft and edit
+prose. All experiments were executed by the author on the author's hardware;
+every reported number is produced by the released code and independently checked
+against the machine-readable result files by a verification script also included
+in the repository. The author reviewed all code and text and takes full
+responsibility for the contents of this paper, including any errors.
 
 %=============================================================================
 \bibliographystyle{IEEEtran}
