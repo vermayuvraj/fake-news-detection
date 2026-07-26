@@ -159,6 +159,25 @@ if TPATH.exists():
 else:
     print("NOTE: transformer.json absent; capacity-control checks skipped")
 
+# --- multi-seed transformer -----------------------------------------------
+MPATH = RES / "transformer_multiseed.json"
+if MPATH.exists():
+    M = json.load(open(MPATH, encoding="utf-8"))
+    for proto in ["random", "topic_disjoint"]:
+        agg = M["aggregate"][proto]
+        for key in ["average_precision", "f1_prior_matched_mean",
+                    "f1_default_threshold", "balanced_accuracy",
+                    "f1_threshold_oracle", "auc_roc", "val_f1_selected"]:
+            present(f"ms {proto} {key} mean", agg[key]["mean"])
+            present(f"ms {proto} {key} std", f"{agg[key]['std']:.4f}".lstrip("0"))
+    # best-seed topic AP quoted in the text
+    td_aps = [M["per_seed"]["topic_disjoint"][s]["average_precision"]
+              for s in M["per_seed"]["topic_disjoint"]]
+    import builtins
+    present("ms topic best AP", f"{builtins.max(td_aps):.4f}")
+else:
+    print("NOTE: transformer_multiseed.json absent; multi-seed checks skipped")
+
 # --- cross-corpus transfer (LIAR) -----------------------------------------
 CPATH = RES / "crosscorpus.json"
 if CPATH.exists():

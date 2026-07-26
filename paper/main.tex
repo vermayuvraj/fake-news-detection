@@ -1181,12 +1181,50 @@ returned a confident, well-validated model that fails almost completely on the
 target distribution. No amount of care with the validation set detects this;
 only a shifted evaluation does.
 
+\emph{Robustness across seeds.} Table~\ref{tab:transformer} reports a single
+representative run (seed 42) for a like-for-like comparison with the
+deterministic linear models. To confirm that its topic-shift collapse is not a
+lucky draw, we repeat both protocols across five seeds
+(Table~\ref{tab:multiseed}). In-distribution performance is essentially constant
+(average precision $1.0000 \pm 0.0000$). The topic-disjoint result is stable in
+direction and moderate in spread: average precision is $0.8610 \pm 0.0567$ and
+prior-matched \Fone{} is $0.6858 \pm 0.0251$, and every one of the five seeds
+lands below the linear model's average precision of $0.9475$---the best seed
+reaches only $0.9232$. The model-selection trap is the most stable feature of
+all: validation \Fone{} is $0.9999 \pm 0.0001$ across seeds while deployed test
+\Fone{} averages $0.2575 \pm 0.0235$. The single-seed conclusion therefore holds
+under reseeding.
+
+\begin{table}[t]
+\centering
+\caption{Five-seed distribution (seeds $\{42,0,1,2,3\}$) of the DistilBERT
+control, as mean $\pm$ standard deviation. In-distribution scores are constant;
+the topic-disjoint collapse is robust, and its validation \Fone{} stays near $1$
+in every seed even as test \Fone{} averages $0.26$.}
+\label{tab:multiseed}
+\footnotesize
+\setlength{\tabcolsep}{3.4pt}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Metric & Random & Topic-disjoint\\
+\midrule
+Validation \Fone{}          & $0.9991 \pm .0004$ & $0.9999 \pm .0001$\\
+Test \Fone{} (deployed)     & $0.9992 \pm .0001$ & $0.2575 \pm .0235$\\
+Threshold-oracle \Fone{}    & $0.9994 \pm .0002$ & $0.8049 \pm .0383$\\
+Average precision           & $1.0000 \pm .0000$ & $0.8610 \pm .0567$\\
+Balanced accuracy           & $0.9993 \pm .0001$ & $0.6059 \pm .0431$\\
+Prior-matched \Fone{}       & $0.9992 \pm .0001$ & $0.6858 \pm .0251$\\
+ROC-AUC                     & $1.0000 \pm .0000$ & $0.9457 \pm .0332$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
 Taken together, Q4 answers in the direction that the data, not the instrument,
 is the binding constraint. Capacity sufficient to represent veracity-bearing
 content did not cause the model to use it. Instead the transformer fit the
-provenance signature more sharply---reaching an essentially perfect
-in-distribution ranking---and paid for it with a steeper loss when that
-signature stopped being predictive.
+provenance signature more sharply, reaching an essentially perfect
+in-distribution ranking, and paid for it with a steeper loss when that signature
+stopped being predictive.
 
 \begin{table*}[t]
 \centering
@@ -1197,7 +1235,8 @@ loses off-distribution on every prior-robust metric. The final row repeats the
 random protocol at a 512-token limit, confirming that truncation is not the
 operative factor. Validation \Fone{} is shown to expose the model-selection
 trap: under topic shift it is at its highest exactly where test performance is
-at its worst.}
+at its worst. DistilBERT rows are the seed-42 run; the five-seed distribution is
+in Table~\ref{tab:multiseed}.}
 \label{tab:transformer}
 \footnotesize
 \begin{tabular}{@{}llccccccccc@{}}
@@ -1472,16 +1511,14 @@ training procedure could learn veracity-bearing features from this corpus. Our
 claim remains asymmetric in that direction.
 
 \textbf{Scope of the capacity control.} The transformer result rests on a single
-architecture, a single seed, two epochs, and no hyperparameter search.
-Fine-tuning outcomes vary across seeds \cite{reimers2017reporting}, so the
-precise magnitudes---particularly the deployed \Fone{} of $0.2592$, which sits at
-a badly calibrated operating point---should be read as one draw rather than a
-tight estimate. The \emph{direction} of the effect is supported by three
-prior-robust metrics simultaneously (average precision, balanced accuracy,
-prior-matched \Fone{}) and by the 512-token replication, which is why we state
-the direction confidently and the magnitude loosely. A larger model, a
-multi-seed protocol, and a search over learning rate and epoch count would each
-sharpen this.
+architecture, two epochs, and no hyperparameter search, though it is averaged
+over five seeds (Table~\ref{tab:multiseed}). The topic-disjoint average precision
+carries real spread ($0.8610 \pm 0.0567$), so individual magnitudes should be
+read with that variance in mind; the direction, however, is consistent across
+all five seeds and across three prior-robust metrics, and every seed falls below
+the linear model. A larger model and a search over learning rate and epoch count
+would sharpen the estimate further, and a single architecture cannot speak for
+all transformers.
 
 \textbf{Asymmetric preprocessing in the control.} The transformer receives
 minimally normalised text while the linear model receives alpha-only text
@@ -1746,7 +1783,8 @@ normalisation, clipped at the 98th percentile for legibility (right).}
   \item \textbf{Compute.} Linear study $\approx12$ minutes on one CPU;
     transformer control $\approx32$ minutes on one RTX~4050 (three protocols
     at $6.5$, $5.8$ and $6.2$ minutes, plus $13.0$ minutes for the 512-token
-    replication).
+    replication); five-seed protocol a further $\approx60$ minutes; cross-corpus
+    evaluation under one minute plus the LIAR download.
 \end{itemize}
 
 \section{Use of AI Tools}

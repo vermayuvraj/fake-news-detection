@@ -8,8 +8,8 @@ paper/
 ├── main.tex                     IEEEtran conference manuscript (single file)
 ├── refs.bib                     65 BibTeX entries, all cited
 ├── main.bbl                     compiled bibliography (required by arXiv)
-├── main.pdf                     compiled output, 16 pages
-├── figures/                     9 vector PDF figures
+├── main.pdf                     compiled output, 17 pages
+├── figures/                     10 vector PDF figures
 ├── validate_latex.py            static pre-flight checker (no LaTeX needed)
 ├── verify_numbers.py            cross-checks every number against the results JSON
 ├── ARXIV_SUBMISSION_GUIDE.md    step-by-step submission guide
@@ -75,17 +75,20 @@ place:
 ```bash
 python experiments/run_experiments.py      # writes experiments/results/results.json
 python experiments/run_shift_analysis.py   # writes experiments/results/shift_analysis.json
-python experiments/run_transformer.py      # writes experiments/results/transformer.json (needs a GPU)
-python experiments/make_figures.py         # writes paper/figures/*.pdf
+python experiments/run_transformer.py           # transformer.json (needs a GPU)
+python experiments/run_transformer_multiseed.py # transformer_multiseed.json (GPU; ~60 min)
+python experiments/run_crosscorpus.py           # crosscorpus.json (downloads LIAR)
+python experiments/make_figures.py              # writes paper/figures/*.pdf
 ```
 
 The linear experiments take roughly twelve minutes on one CPU; the DistilBERT
-capacity control adds about 32 minutes on a 6\,GB GPU (it also runs on CPU, far
-more slowly). `make_figures.py` skips the transformer figure if
-`transformer.json` is absent.
+capacity control adds about 32 minutes on a 6\,GB GPU, the five-seed run about
+60 minutes more, and the cross-corpus evaluation under a minute plus the LIAR
+download. `make_figures.py` skips the transformer and cross-corpus figures if
+their result files are absent.
 
 Every number quoted in the manuscript comes from those JSON files; nothing is
-transcribed by hand, and `verify_numbers.py` enforces that (203 values checked).
+transcribed by hand, and `verify_numbers.py` enforces that (254 values checked).
 
 ## Before you submit — remaining author actions
 
@@ -135,15 +138,16 @@ bibliographic metadata was not machine-verified against a live database.
 The paper makes a measurement claim, not a modelling claim: the classifiers are
 instruments, and the object of study is the corpus.
 
-The transformer comparison a reviewer would ask for **has been run** — see
-Section VII-F and Table VII. Fine-tuned DistilBERT is stronger in-distribution
-(F1 0.9993) and substantially weaker under topic shift (average precision
-0.8711 against the linear model's 0.9475), which supports rather than
-complicates the paper's thesis. Its limits — one architecture, one seed, no
-hyperparameter search — are stated in Limitations; the scaled-up version is
-scoped in Future Work.
+The two experiments a reviewer would ask for **have both been run**:
 
-The genuinely unrun experiment is **cross-corpus transfer** (train here, test on
-an independently constructed corpus such as NELA-GT or LIAR). That is now the
-highest-value addition, and the manuscript scopes it rather than speculating
-about the outcome.
+- **Capacity control** (transformer): fine-tuned DistilBERT, five seeds, under
+  the same protocols. Stronger in-distribution (F1 0.9993) and substantially
+  weaker under topic shift (AP 0.861 ± 0.057 vs the linear model's 0.9475,
+  every seed below it). Supports rather than complicates the thesis.
+- **Cross-corpus transfer**: trained on ISOT, tested on LIAR. All three models
+  fall to near-chance ranking (AUC 0.54–0.57) and none beats the majority-class
+  baseline, despite exceeding 0.99 AUC within ISOT.
+
+Remaining scoped-but-unrun items (Future Work): an article-level external corpus
+such as NELA-GT to isolate source from granularity, and larger encoders /
+hyperparameter search for the capacity control.
