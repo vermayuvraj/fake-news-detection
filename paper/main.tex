@@ -71,10 +71,13 @@ lossless. A fine-tuned DistilBERT sharpens rather than resolves the problem: it
 is stronger in-distribution (\Fone{}~$=0.9993$) yet degrades far more under
 topic shift, losing 12.9 points of average precision against the linear model's
 5.2 and reaching prior-matched \Fone{} of only~0.689, while its in-domain
-validation \Fone{} of 0.9995 gives no warning of that collapse. We conclude that
-within-corpus scores on this benchmark quantify source and topic separability
-rather than veracity assessment, that added capacity exploits the shortcut more
-efficiently instead of avoiding it, and we recommend metadata-only,
+validation \Fone{} of 0.9995 gives no warning of that collapse. The decisive
+test is cross-corpus: transferred to the independently built LIAR benchmark, all
+three models fall to near-chance ranking (ROC-AUC $0.54$--$0.57$) and none beats
+a majority-class baseline. We conclude that within-corpus scores on this
+benchmark quantify source and topic separability rather than veracity
+assessment, that added capacity exploits the shortcut more efficiently instead
+of avoiding it, and we recommend metadata-only,
 small-sample, and topic-disjoint baselines as inexpensive diagnostics that any
 future study on this corpus can report.
 \end{abstract}
@@ -158,8 +161,12 @@ and ablated directly.
   \item A capacity control (Section~\ref{sec:results-transformer}) in which a
     fine-tuned DistilBERT, trained on identical documents and splits, is
     stronger in-distribution but loses 2.5 times more average precision under
-    topic shift---evidence that the limitation is a property of the data rather
+    topic shift, evidence that the limitation is a property of the data rather
     than of model expressiveness.
+  \item A cross-corpus test (Section~\ref{sec:results-crosscorpus}) showing that
+    all three ISOT-trained models transfer to the LIAR benchmark at near-chance
+    ranking, the decisive external check that in-corpus scores do not reflect a
+    transferable notion of veracity.
   \item Concrete, low-cost diagnostics we recommend as standard practice for
     future work on this corpus (Section~\ref{sec:discussion}).
 \end{enumerate}
@@ -295,6 +302,10 @@ This yields three empirical questions, which organise our experiments:
     veracity-bearing content far better than a bag of words, nonetheless
     degrades at least as much under shift, the constraint lies in
     $\mathcal{P}_{\text{bench}}$ rather than in model expressiveness.
+  \item[Q5] \emph{External validity.} Does anything learned on this corpus
+    transfer to an independently constructed one? A model trained here and
+    tested on a different benchmark isolates whatever veracity signal, if any,
+    is not tied to this corpus's provenance structure.
 \end{description}
 
 %=============================================================================
@@ -683,7 +694,15 @@ reports wall-clock figures.
 \cite{bisaillon2020dataset} and is not redistributed with our code.
 Table~\ref{tab:corpus} reports its composition together with the leakage
 indicators discussed in Section~\ref{sec:method-clean}; all values are computed
-by the released script rather than quoted from prior work.
+by the released script rather than quoted from prior work. The cross-corpus test
+(Section~\ref{sec:results-crosscorpus}) additionally uses the LIAR test split
+\cite{wang2017liar}: $1{,}267$ short political statements (mean $18.4$ tokens,
+against ISOT's $415$) fact-checked by PolitiFact. LIAR's six-way labels are
+binarised with the conventional cut---\{pants-fire, false, barely-true\}
+$\rightarrow$ fake and \{half-true, mostly-true, true\} $\rightarrow$ real---which
+yields a test prior of $0.436$ fake. The barely-true/half-true boundary is the
+one debatable choice; moving it shifts the prior but not the near-chance result
+of Section~\ref{sec:results-crosscorpus}.
 
 \textbf{Hardware and software.} All experiments run on a single machine: Intel
 Core i7-14700HX (28 logical cores), 15.7\,GB RAM, Windows~10 (AMD64). The linear
@@ -1215,6 +1234,73 @@ sharply rather than replacing it with veracity-bearing evidence.}
 \label{fig:transformer}
 \end{figure}
 
+\subsection{Q5: Cross-Corpus Transfer Collapses to Chance}
+\label{sec:results-crosscorpus}
+The within-corpus protocols hold the corpus fixed. The decisive test of external
+validity is to change the corpus entirely. We train each model on all
+$38{,}826$ ISOT documents and evaluate on the LIAR test split, whose short
+single-source claims share almost none of ISOT's provenance structure.
+Table~\ref{tab:crosscorpus} reports the result, and Figure~\ref{fig:crosscorpus}
+places it beside the in-corpus and topic-shift figures.
+
+The transfer is essentially complete failure. ROC-AUC falls to $0.5398$ for
+logistic regression, $0.5617$ for passive--aggressive, and $0.5691$ for
+DistilBERT, all within seven points of the chance value of $0.5$; balanced
+accuracy lies between $0.5244$ and $0.5487$ against a chance value of $0.5$; and
+average precision ($0.4859$ to $0.5060$) barely exceeds the $0.436$ expected of a
+random ranker. None of the three models reaches the accuracy of a majority-class
+predictor ($0.5635$): trained to near-perfection on ISOT, they are worse than a
+constant ``always real'' rule on LIAR. The ordering among them is preserved but
+meaningless at this scale---DistilBERT ranks marginally best, as it did
+in-distribution, but an AUC of $0.5691$ is not a usable classifier.
+
+Two controls rule out trivial explanations. Every one of the $1{,}267$ LIAR
+documents contains at least one term in the ISOT vocabulary, so the collapse is
+not an artefact of empty feature vectors; the shared words simply carry no
+veracity signal the ISOT model can use. And the effect holds for the transformer
+as well as the linear models, so it is not a limitation of bag-of-words
+representation. The contrast with the within-corpus AUC values, which remain
+near $1.0$ even under topic shift (Table~\ref{tab:shift}), is the sharpest
+statement of the paper's thesis: what the models learn ranks ISOT documents
+almost perfectly and ranks LIAR documents no better than a coin.
+
+This is the external check that Q1--Q4 could only approach from inside the
+corpus. A model can attain \Fone{}~$=0.99$ on this benchmark and carry
+essentially no transferable capacity to judge whether a claim is true.
+
+\begin{table}[t]
+\centering
+\caption{Cross-corpus transfer: trained on all of ISOT, tested on the LIAR test
+split ($n=1{,}267$, fake prior $0.436$). All models fall to near-chance ranking
+(AUC and balanced accuracy near $0.5$; average precision near the prior $0.436$)
+and none beats the majority-class accuracy of $0.5635$. Compare the
+within-corpus AUC values near $1.0$ in Table~\ref{tab:shift}.}
+\label{tab:crosscorpus}
+\footnotesize
+\setlength{\tabcolsep}{3.4pt}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Model & Acc. & $P$ & $R$ & \Fone{} & AUC & Bal.\ acc.\\
+\midrule
+Majority class (real) & 0.5635 & -- & 0.000 & 0.000 & -- & 0.5000\\
+\midrule
+TF--IDF $+$ logistic reg. & 0.5067 & 0.4553 & 0.6637 & 0.5401 & 0.5398 & 0.5244\\
+TF--IDF $+$ pass.-aggr.   & 0.5201 & 0.4670 & 0.7034 & 0.5613 & 0.5617 & 0.5408\\
+DistilBERT                & 0.5375 & 0.4776 & 0.6365 & 0.5457 & 0.5691 & 0.5487\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig_crosscorpus.pdf}
+\caption{ROC-AUC of each model across three evaluation regimes: in-corpus random
+split, in-corpus topic-disjoint split, and cross-corpus transfer to LIAR.
+Ranking quality survives topic shift within ISOT but collapses to near-chance on
+an independently constructed corpus. The dashed line marks chance ($0.5$).}
+\label{fig:crosscorpus}
+\end{figure}
+
 \subsection{Computational Cost}
 \label{sec:results-cost}
 Table~\ref{tab:cost} reports measured cost on the hardware of
@@ -1364,13 +1450,17 @@ pairing publisher sets:
 
 We state the boundaries of these conclusions explicitly.
 
-\textbf{Single corpus.} Every experiment uses one dataset. Our conclusions
-concern this corpus and, by extension, corpora built by pairing disjoint
-publisher sets; we do not claim they transfer to benchmarks with different
-construction, such as claim-level resources
-\cite{wang2017liar,thorne2018fever}. A cross-corpus evaluation is the most
-important missing experiment and is the first item of
-Section~\ref{sec:futurework}.
+\textbf{Training corpus and label mapping.} All models are trained on one
+corpus, and our conclusions concern ISOT and, by extension, corpora built by
+pairing disjoint publisher sets. The cross-corpus test
+(Section~\ref{sec:results-crosscorpus}) uses a single external benchmark, LIAR,
+with one binarisation of its six-way labels; a different cut, or a different
+external corpus such as NELA-GT \cite{norregaard2019nela}, could shift the exact
+numbers, though the near-chance transfer is a wide margin that a boundary choice
+is unlikely to close. LIAR's claim-level format also differs from ISOT's
+article-level format, so the transfer failure conflates a change of source with
+a change of granularity; disentangling the two would require an article-level
+external corpus.
 
 \textbf{Instrument capacity.} The primary probe is a bag-of-words linear model
 that cannot represent word order beyond bigrams, negation, or discourse
@@ -1437,12 +1527,12 @@ which our ablations address descriptively rather than inferentially.
 \section{Future Work}
 \label{sec:futurework}
 
-\textbf{Cross-corpus transfer.} The decisive experiment is to train here and
-evaluate on an independently constructed corpus---NELA-GT
-\cite{norregaard2019nela} for article-level text, LIAR \cite{wang2017liar} for
-claim-level---with label mappings stated explicitly. Our prediction, which the
-present results support but do not establish, is a substantially larger drop
-than under topic-disjoint evaluation.
+\textbf{Article-level cross-corpus transfer.} Our LIAR result
+(Section~\ref{sec:results-crosscorpus}) changes both source and granularity at
+once, since LIAR is claim-level. Repeating the transfer test on an article-level
+external corpus such as NELA-GT \cite{norregaard2019nela} would isolate the
+effect of changing source alone, and would test whether the near-chance collapse
+we observe is specific to LIAR's short claims or general to out-of-corpus text.
 
 \textbf{Source-controlled data construction.} The identifiability problem
 motivates corpora containing veracity variation \emph{within} publisher, so
@@ -1501,7 +1591,12 @@ average precision against the linear model's $5.2$ and reaching prior-matched
 veracity-bearing content was instead spent fitting the provenance signature more
 sharply. Notably, its validation \Fone{} peaked at $0.9995$ in precisely the
 condition where test \Fone{} fell to $0.2592$, so standard in-domain model
-selection gives no warning of the failure.
+selection gives no warning of the failure. The cross-corpus test is the final
+word: transferred to the LIAR benchmark, all three ISOT-trained models rank at
+near-chance (ROC-AUC $0.54$--$0.57$) and none beats a majority-class predictor,
+even though every model exceeds $0.99$ AUC within ISOT. A benchmark score of
+$0.99$ on this corpus therefore certifies almost no transferable ability to
+judge veracity.
 
 Our contribution is measurement rather than modelling, and its limits are
 correspondingly specific: one corpus, a shift protocol that perturbs several
@@ -1645,7 +1740,8 @@ normalisation, clipped at the 98th percentile for legibility (right).}
     resamples.
   \item \textbf{Artifacts.} Machine-readable results
     (\texttt{results.json}, \texttt{shift\_analysis.json},
-    \texttt{transformer.json}) accompany the code, and all reported values are
+    \texttt{transformer.json}, \texttt{transformer\_multiseed.json},
+    \texttt{crosscorpus.json}) accompany the code, and all reported values are
     drawn from them.
   \item \textbf{Compute.} Linear study $\approx12$ minutes on one CPU;
     transformer control $\approx32$ minutes on one RTX~4050 (three protocols

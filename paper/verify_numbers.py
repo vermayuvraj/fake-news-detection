@@ -159,6 +159,24 @@ if TPATH.exists():
 else:
     print("NOTE: transformer.json absent; capacity-control checks skipped")
 
+# --- cross-corpus transfer (LIAR) -----------------------------------------
+CPATH = RES / "crosscorpus.json"
+if CPATH.exists():
+    CC = json.load(open(CPATH, encoding="utf-8"))
+    present("liar n", f"{CC['liar']['n_test']:,}".replace(",", "{,}"))
+    present("liar prior", f"{CC['liar']['fake_ratio']:.3f}")
+    present("liar words", f"{CC['liar']['mean_words']:.1f}")
+    present("liar majority acc", f"{CC['baselines']['majority_class']['accuracy']:.4f}")
+    for m in ["LogisticRegression", "PassiveAggressive"]:
+        d = CC["linear"][m]
+        for k in ["accuracy", "precision", "recall", "f1", "auc_roc", "balanced_accuracy"]:
+            present(f"cc {m} {k}", d[k])
+    if CC.get("distilbert"):
+        for k in ["accuracy", "precision", "recall", "f1", "auc_roc", "balanced_accuracy"]:
+            present(f"cc bert {k}", CC["distilbert"][k])
+else:
+    print("NOTE: crosscorpus.json absent; cross-corpus checks skipped")
+
 # --- derived quantities the paper states ----------------------------------
 derived = {
     "mitigation cost (A1-A4)":

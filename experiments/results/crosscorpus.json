@@ -1,0 +1,59 @@
+{
+  "liar": {
+    "n_test": 1267,
+    "fake_ratio": 0.43646408839779005,
+    "mean_words": 18.40410418310971,
+    "label_mapping": {
+      "fake": [
+        "barely-true",
+        "false",
+        "pants-fire"
+      ],
+      "real": [
+        "half-true",
+        "mostly-true",
+        "true"
+      ]
+    }
+  },
+  "baselines": {
+    "majority_class": {
+      "predicts": "real",
+      "accuracy": 0.56353591160221,
+      "f1": 0.0,
+      "balanced_accuracy": 0.5
+    },
+    "random_ranker_ap": 0.43646408839779005
+  },
+  "linear": {
+    "n_train_isot": 38826,
+    "liar_docs_all_zero_features": 0,
+    "LogisticRegression": {
+      "accuracy": 0.5067087608524072,
+      "precision": 0.45533498759305213,
+      "recall": 0.6636528028933092,
+      "f1": 0.5401030169242089,
+      "auc_roc": 0.5397500772460883,
+      "average_precision": 0.48589526363922675,
+      "balanced_accuracy": 0.5244034322589796
+    },
+    "PassiveAggressive": {
+      "accuracy": 0.5201262825572218,
+      "precision": 0.4669867947178872,
+      "recall": 0.7034358047016275,
+      "f1": 0.5613275613275613,
+      "auc_roc": 0.5616575744221739,
+      "average_precision": 0.5010407957804816,
+      "balanced_accuracy": 0.5407935326029145
+    }
+  },
+  "distilbert": {
+    "accuracy": 0.5374901341752171,
+    "precision": 0.47761194029850745,
+    "recall": 0.6365280289330922,
+    "f1": 0.5457364341085271,
+    "auc_roc": 0.5691377816949564,
+    "average_precision": 0.5059968513734006,
+    "balanced_accuracy": 0.5486561713292912
+  }
+}

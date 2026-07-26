@@ -290,4 +290,43 @@ if tpath.exists():
 else:
     print("skipping fig_transformer.pdf (transformer.json not present yet)")
 
+# --------------------------------------------------------------------------- #
+# Fig. 10: cross-corpus AUC collapse (only if the run exists)
+# --------------------------------------------------------------------------- #
+cpath = RES / "crosscorpus.json"
+if cpath.exists() and (RES / "transformer.json").exists():
+    C = json.load(open(cpath, encoding="utf-8"))
+    T = json.load(open(RES / "transformer.json", encoding="utf-8"))
+    RJ = json.load(open(RES / "results.json", encoding="utf-8"))
+    # (label, colour, linear-model key or None for the transformer, cross-corpus block)
+    models = [("TF-IDF + PA", C_MAIN, "PassiveAggressive", C["linear"]["PassiveAggressive"]),
+              ("TF-IDF + LR", C_REAL, "LogisticRegression", C["linear"]["LogisticRegression"]),
+              ("DistilBERT", C_ALT, None, C["distilbert"])]
+    regimes = ["In-corpus\n(random)", "Topic-\ndisjoint", "Cross-corpus\n(LIAR)"]
+    fig, ax = plt.subplots(figsize=(COL2 * 0.62, 2.4))
+    x = np.arange(len(regimes))
+    w = 0.26
+    for i, (lab, colr, skey, cc) in enumerate(models):
+        if skey is not None:
+            in_auc = RJ["shift"]["random"]["models"][skey]["test"]["auc_roc"]
+            td_auc = RJ["shift"]["topic_disjoint"]["models"][skey]["test"]["auc_roc"]
+        else:
+            in_auc = T["protocols"]["random"]["test"]["auc_roc"]
+            td_auc = T["protocols"]["topic_disjoint"]["test"]["auc_roc"]
+        vals = [in_auc, td_auc, cc["auc_roc"]]
+        b = ax.bar(x + (i - 1) * w, vals, w, label=lab, color=colr)
+        for bb, v in zip(b, vals):
+            ax.text(bb.get_x() + bb.get_width() / 2, v + 0.01, f"{v:.2f}",
+                    ha="center", va="bottom", fontsize=5.6, rotation=90)
+    ax.axhline(0.5, ls="--", lw=0.8, color="grey")
+    ax.text(2.4, 0.505, "chance", fontsize=6, color="grey", va="bottom", ha="right")
+    ax.set_xticks(x)
+    ax.set_xticklabels(regimes, fontsize=6.6)
+    ax.set_ylim(0.45, 1.06)
+    ax.set_ylabel("ROC-AUC")
+    ax.legend(frameon=False, loc="lower left", fontsize=6.2, ncol=1)
+    save(fig, "fig_crosscorpus.pdf")
+else:
+    print("skipping fig_crosscorpus.pdf (crosscorpus.json not present yet)")
+
 print("all figures written to", FIG)

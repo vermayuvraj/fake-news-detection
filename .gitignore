@@ -18,3 +18,7 @@ data/*.csv
 # OS
 .DS_Store
 Thumbs.db
+data/liar/
+
+# Saved transformer checkpoint (255MB, regenerable via run_transformer_multiseed.py)
+models/bert_isot_*/
