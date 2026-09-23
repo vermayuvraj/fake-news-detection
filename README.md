@@ -1,5 +1,10 @@
 # Fake News Detection
 
+# Audit of Shortcut Learning in Fake News Corpora
+
+[![arXiv](https://shields.io)](https://arxiv.org)
+
+
 ![tests](https://github.com/vermayuvraj/fake-news-detection/actions/workflows/ci.yml/badge.svg)
 ![python](https://img.shields.io/badge/python-3.10-blue)
 ![license](https://img.shields.io/badge/license-MIT-green)
@@ -116,3 +121,38 @@ sorted, and the solvers are deterministic, so running `python main.py` again
 gives the same numbers (I checked two runs are identical). Setting
 `PYTHONHASHSEED=42` before running doesn't change anything but is a safe habit.
 More detail is in REPRODUCIBILITY_CHECKLIST.md.
+
+
+## Research paper
+
+### What Does 99% Accuracy Measure?
+**A Reproducible Audit of Shortcut Learning in a Widely Used Fake News Corpus**
+
+**Author:** Yuvraj Verma  
+**arXiv:** [2609.25006](https://arxiv.org/abs/2609.25006)  
+**DOI:** [10.48550/arXiv.2609.25006](https://doi.org/10.48550/arXiv.2609.25006)
+
+This repository contains the code, experiments, and reproducibility artifacts for the paper:
+
+> **Yuvraj Verma.**  
+> *What Does 99% Accuracy Measure? A Reproducible Audit of Shortcut Learning in a Widely Used Fake News Corpus.*  
+> arXiv:2609.25006, 2026.
+
+### Abstract
+
+Text classifiers trained on the widely used ISOT/Kaggle "Fake and Real News" corpus routinely achieve near-perfect accuracy and F1 scores. This work provides a reproducible audit of the benchmark and investigates whether these scores actually measure fake-news detection.
+
+The study examines metadata leakage, source tags, duplicate documents, topic-disjoint evaluation, temporal transfer, and cross-dataset generalization. The results show that high within-corpus performance can substantially reflect source and topic separability rather than genuine veracity detection.
+
+### Citation
+
+If you use this work, please cite:
+
+```bibtex
+@article{verma2026accuracy,
+  title={What Does 99\% Accuracy Measure? A Reproducible Audit of Shortcut Learning in a Widely Used Fake News Corpus},
+  author={Verma, Yuvraj},
+  journal={arXiv preprint arXiv:2609.25006},
+  year={2026},
+  doi={10.48550/arXiv.2609.25006}
+}
