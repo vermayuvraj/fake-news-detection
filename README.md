@@ -1,9 +1,5 @@
 # Fake News Detection
 
-# Audit of Shortcut Learning in Fake News Corpora
-
-[![arXiv](https://shields.io)](https://arxiv.org)
-
 
 ![tests](https://github.com/vermayuvraj/fake-news-detection/actions/workflows/ci.yml/badge.svg)
 ![python](https://img.shields.io/badge/python-3.10-blue)
