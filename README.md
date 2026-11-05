@@ -7,6 +7,8 @@
 
 Author: Yuvraj Verma
 
+**Research preprint:** [What Does 99% Accuracy Measure?](https://arxiv.org/abs/2609.25006) audits data leakage in the ISOT Fake and Real News dataset. The subject field alone reaches F1 = 1.00. See the [audit results and citation](https://www.yuvrajverma.tech/publications/shortcut-learning).
+
 Given a news article's title and body, this classifies it as real or fake. The
 pipeline cleans the text, turns it into TF-IDF features, compares a few linear
 classifiers on a validation set, picks the best one, and reports the metrics on
